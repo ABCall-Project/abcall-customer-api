@@ -36,5 +36,17 @@ class CustomerService:
         """
         list_customers=self.customer_repository.list()
         return list_customers
+    
+
+    def get_base_plan_issue_fee(self, customer_id):
+        """
+        This method query base plan issue fee customer id
+        Args: 
+            customer_id (UUID): customer id
+        Returns:
+            customer_plan_rate: (decimal)
+        """
+        issue_fee = self.customer_repository.get_customer_issue_fee(customer_id)
+        return issue_fee
 
     

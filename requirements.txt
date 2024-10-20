@@ -8,3 +8,4 @@ SQLAlchemy==1.4.40
 flask-sqlalchemy==3.0.5
 marshmallow==3.20.1
 marshmallow-sqlalchemy==0.29.0
+coverage==5.3

@@ -25,6 +25,14 @@ class CustomerPostgresqlRepository(CustomerRepository):
         finally:
             session.close()
 
+    def get_customer_issue_fee(self,customer_id):
+        session = self.Session()
+        try:
+            result= session.query(PlanModelSqlAlchemy.issue_fee).join(CustomerModelSqlAlchemy, CustomerModelSqlAlchemy.plan_id == PlanModelSqlAlchemy.id).filter(CustomerModelSqlAlchemy.id == customer_id).first()
+            return float(result[0])
+        finally:
+            session.close()
+
 
     def list(self) -> List[Customer]:
         session = self.Session()
