@@ -23,3 +23,22 @@ class PlanPostgresqlRepository(PlanRepository):
             return session.query(PlanModelSqlAlchemy.basic_monthly_rate).filter(PlanModelSqlAlchemy.id == plan_id).first()
         finally:
             session.close()
+
+    def get_plan_by_id(self,plan_id):
+        session = self.Session()
+        try:
+            result = session.query(PlanModelSqlAlchemy).filter_by(id=plan_id).first()
+            if result:
+                return self._from_model(result)
+            else:
+                return None
+        finally:
+            session.close()
+
+    def _from_model(self, model: PlanModelSqlAlchemy) -> Plan:
+        return Plan(
+            id=model.id,
+            name=model.name,
+            basic_monthly_rate=model.basic_monthly_rate,
+            issue_fee=model.issue_fee
+        )

@@ -18,14 +18,7 @@ run:
 		flask run -p $(PORT); \
 	fi
 
-run-tests:
-	 FLASK_ENV=test python -m unittest discover -s tests -p '*Test.py' -v
 
-run-tests-coverage:
-	 coverage run -m unittest discover
-	 coverage report -m
-	 coverage html
-	 coverage report --fail-under=50
 
 run-docker:
 ifeq ($(strip $(PORT)),)
@@ -33,6 +26,19 @@ ifeq ($(strip $(PORT)),)
 else
 	flask run -p $(PORT) -h 0.0.0.0
 endif
+
+run-tests:
+	 make docker-test-up
+	 FLASK_ENV=test python -m unittest discover -s tests -p '*Test.py' -v
+	 make docker-test-down
+
+run-tests-coverage:
+	 make docker-test-up
+	 FLASK_ENV=test coverage run -m unittest discover -s tests -p '*Test.py' -v
+	 coverage report -m
+	 coverage html
+	 coverage report --fail-under=80
+	 make docker-test-down
 
 docker-gunicorn:
 	  gunicorn -w 4 --bind 127.0.0.1:$(PORT) wsgi:app
@@ -49,8 +55,22 @@ docker-dev-up:
 docker-dev-down:
 	docker compose -f=docker-compose.develop.yml down
 
+docker-test-up:
+	docker compose -f=docker-compose.test.yml up --build -d
+	sleep 2
+
+docker-test-down:
+	make docker-db-truncate
+	docker compose -f=docker-compose.test.yml down
+
 create-database:
 	docker exec customer-local-db psql -U develop -d customer-db -f /docker-entrypoint-initdb.d/init.sql
+
+docker-db-truncate:
+	docker exec customer-test-db psql -U develop -d customer-db  -c  "TRUNCATE TABLE channel_plan CASCADE;"
+	docker exec customer-test-db psql -U develop -d customer-db  -c  "TRUNCATE TABLE customer CASCADE;"
+	docker exec customer-test-db psql -U develop -d customer-db  -c  "TRUNCATE TABLE plan CASCADE;"
+	docker exec customer-test-db psql -U develop -d customer-db  -c  "TRUNCATE TABLE channel CASCADE;"
 
 
 kubernetes-up:

@@ -14,5 +14,14 @@ class Plan:
         self.issue_fee=issue_fee
 
 
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'name': str(self.name),
+            'basic_monthly_rate': str(self.basic_monthly_rate),
+            'issue_fee': str(self.issue_fee)
+        }
+
+
 
 

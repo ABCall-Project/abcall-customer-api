@@ -2,7 +2,7 @@ INSERT INTO channel (id,name) VALUES
 	 ('731d752e-27df-47f5-908a-6c5ad10c19e3'::uuid,'email');
 
 INSERT INTO plan (id,name,basic_monthly_rate,issue_fee) VALUES
-	 ('845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'ENTERPRISE',5000.00,50.00);
+	 ('845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'EMPRESARIO',5000.00,50.00);
 
 
 

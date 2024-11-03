@@ -50,3 +50,15 @@ class CustomerPostgresqlRepository(CustomerRepository):
             plan_id=model.plan_id,
             date_suscription=model.date_suscription
         )
+    
+
+    def get_customer_by_id(self,customer_id):
+        session = self.Session()
+        try:
+            result = session.query(CustomerModelSqlAlchemy).filter_by(id=customer_id).first()
+            if result:
+                return self._from_model(result)
+            else:
+                return None
+        finally:
+            session.close()

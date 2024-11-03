@@ -24,3 +24,18 @@ class CustomerModelSqlAlchemy(Base):
     plan_id=Column(PG_UUID(as_uuid=True),ForeignKey('plan.id'), default=uuid.uuid4)
     date_suscription=Column(DateTime(timezone=True), default=func.now())
     plan = relationship("PlanModelSqlAlchemy")
+
+class ChannelModelSqlAlchemy(Base):
+    __tablename__ = 'channel'
+    
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(100), nullable=False)
+
+class ChannelPlanModelSqlAlchemy(Base):
+    __tablename__ = 'channel_plan'
+    
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    plan_id=Column(PG_UUID(as_uuid=True),ForeignKey('plan.id'), default=uuid.uuid4)
+    channel_id=Column(PG_UUID(as_uuid=True),ForeignKey('channel.id'), default=uuid.uuid4)
+    plan = relationship("PlanModelSqlAlchemy")
+    channel = relationship("ChannelModelSqlAlchemy")

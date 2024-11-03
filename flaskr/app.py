@@ -1,5 +1,6 @@
 from flask_restful import Resource, Api
 from flask import Flask, request, json
+from flask_cors import CORS
 from .utils.json_custom_encoder import JSONCustomEncoder
 import requests
 from flaskr import create_app
@@ -12,6 +13,7 @@ config = Config()
 
 
 app = create_app('default')
+CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('default')
 app.json_encoder = JSONCustomEncoder
