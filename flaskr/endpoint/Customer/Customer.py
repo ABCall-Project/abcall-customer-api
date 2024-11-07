@@ -6,6 +6,7 @@ from ...application.customer_service import CustomerService
 from ...infrastructure.databases.customer_postgresql_repository import CustomerPostgresqlRepository
 from ...infrastructure.databases.plan_postgresql_repository import PlanPostgresqlRepository
 from ...infrastructure.databases.channel_postgresql_repository import ChannelPostgresqlRepository
+from ...infrastructure.databases.customer_database_postgresql_repository import CustomerDatabasePostgresqlRepository
 from http import HTTPStatus
 from ...utils import Logger
 
@@ -20,7 +21,8 @@ class Customer(Resource):
         self.customer_repository = CustomerPostgresqlRepository(config.DATABASE_URI)
         self.plan_repository=PlanPostgresqlRepository(config.DATABASE_URI)
         self.channel_repository=ChannelPostgresqlRepository(config.DATABASE_URI)
-        self.service = CustomerService(self.customer_repository,self.plan_repository,self.channel_repository)
+        self.customer_database_repository = CustomerDatabasePostgresqlRepository(config.DATABASE_URI)
+        self.service = CustomerService(self.customer_repository,self.plan_repository,self.channel_repository, self.customer_database_repository)        
 
 
     def get(self, action=None):
@@ -39,7 +41,12 @@ class Customer(Resource):
         else:
             return {"message": "Action not found"}, 404
         
-    
+    def post(self, action=None):
+        if action == 'loadCustomerDataBase':
+            return self.load_customer_database_entries()
+        else:
+            return {"message": "Action not supported for POST method"}, 405
+            
     def get_rate_by_customer(self):
 
         try:
@@ -128,3 +135,14 @@ class Customer(Resource):
             log.error(f'Some error occurred trying to get plan by plan_id: {ex}')
             return {'message': 'Something was wrong trying to get plan by plan_id'}, HTTPStatus.INTERNAL_SERVER_ERROR
         
+
+    def load_customer_database_entries(self):
+        try:
+            customer_id = request.json.get('customer_id')
+            entries = request.json.get('entries', [])
+            log.info(f'Receive request to load entries for customer_id {customer_id}')
+            added_entries = self.service.load_customer_database_entries(customer_id, entries)
+            return [entry.to_dict() for entry in added_entries], HTTPStatus.CREATED
+        except Exception as ex:
+            log.error(f'Some error occurred trying to load entries for customer_id {customer_id}: {ex}')
+            return {'message': 'Something was wrong trying to load entries for customer data'}, HTTPStatus.INTERNAL_SERVER_ERROR

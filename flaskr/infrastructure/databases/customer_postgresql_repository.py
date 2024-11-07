@@ -6,7 +6,6 @@ from ...domain.models import Customer
 from ...domain.interfaces import CustomerRepository
 from ...infrastructure.databases.model_sqlalchemy import Base, CustomerModelSqlAlchemy,PlanModelSqlAlchemy
 
-
 class CustomerPostgresqlRepository(CustomerRepository):
     def __init__(self, connection_string: str):
         self.engine = create_engine(connection_string)
