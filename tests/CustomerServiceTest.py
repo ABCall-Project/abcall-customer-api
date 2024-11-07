@@ -2,21 +2,25 @@ import unittest
 from unittest.mock import MagicMock
 from uuid import uuid4
 from flaskr.domain.models.customer import Customer
+from flaskr.domain.models.customer_database import CustomerDatabase
 from flaskr.application.customer_service import CustomerService
 from flaskr.domain.interfaces.customer_repository import CustomerRepository
 from flaskr.domain.interfaces.plan_repository import PlanRepository
 from flaskr.domain.interfaces.channel_repository import ChannelRepository
+from flaskr.domain.interfaces.customer_database_repository import CustomerDatabaseRepository
 
 class TestCustomerService(unittest.TestCase):
     def setUp(self):
         self.mock_customer_repository = MagicMock(spec=CustomerRepository)
         self.mock_plan_repository = MagicMock(spec=PlanRepository)
         self.mock_channel_repository = MagicMock(spec=ChannelRepository)
+        self.mock_customer_database_repository = MagicMock(spec=CustomerDatabaseRepository) 
         
         self.service = CustomerService(
             customer_repository=self.mock_customer_repository,
             plan_repository=self.mock_plan_repository,
-            channel_repository=self.mock_channel_repository
+            channel_repository=self.mock_channel_repository,
+            customer_database_repository=self.mock_customer_database_repository  
         )
 
     def test_get_base_plan_suscription_rate(self):
@@ -80,3 +84,21 @@ class TestCustomerService(unittest.TestCase):
         
         self.assertEqual(result, expected_plan)
         self.mock_plan_repository.get_plan_by_id.assert_called_once_with(plan_id)
+
+    def test_load_customer_database_entries(self):
+        customer_id = uuid4()
+        entries = [
+            {"topic": "Test Topic 1", "content": "Test Content 1"},
+            {"topic": "Test Topic 2", "content": "Test Content 2"}
+        ]
+        expected_entries = [
+            CustomerDatabase(id=uuid4(), customer_id=customer_id, topic="Test Topic 1", content="Test Content 1"),
+            CustomerDatabase(id=uuid4(), customer_id=customer_id, topic="Test Topic 2", content="Test Content 2")
+        ]
+
+        self.mock_customer_database_repository.add_customer_database_entries.return_value = expected_entries
+
+        result = self.service.load_customer_database_entries(customer_id, entries)
+
+        self.assertEqual(result, expected_entries)
+        self.mock_customer_database_repository.add_customer_database_entries.assert_called_once_with(customer_id, entries) 

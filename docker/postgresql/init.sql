@@ -46,3 +46,15 @@ CREATE TABLE IF NOT EXISTS channel_plan (
       REFERENCES channel (id)
       ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS customer_database (
+    id UUID PRIMARY KEY,
+    customer_id UUID,
+    topic TEXT,
+    content TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT fk_customer
+        FOREIGN KEY (customer_id) 
+        REFERENCES customer (id)
+        ON DELETE CASCADE
+);
