@@ -1,3 +1,4 @@
+import uuid
 from flask_restful import Resource
 from flask import jsonify, request
 import logging
@@ -44,6 +45,8 @@ class Customer(Resource):
     def post(self, action=None):
         if action == 'loadCustomerDataBase':
             return self.load_customer_database_entries()
+        if action == 'loadCustomers':
+            return self.add_customers()
         else:
             return {"message": "Action not supported for POST method"}, 405
             
@@ -146,3 +149,20 @@ class Customer(Resource):
         except Exception as ex:
             log.error(f'Some error occurred trying to load entries for customer_id {customer_id}: {ex}')
             return {'message': 'Something was wrong trying to load entries for customer data'}, HTTPStatus.INTERNAL_SERVER_ERROR
+    
+    def add_customers(self):
+        try:
+            customers = request.json.get('customers', [])
+            plan_id = request.json.get('plan_id')
+
+            if not plan_id or not customers:
+                log.error('Plan ID or customers list missing in the request')
+                return {'message': 'Plan ID and customers list are required'}, HTTPStatus.BAD_REQUEST
+
+            log.info(f'Receive request to add {len(customers)} customers with plan_id {plan_id}')
+            added_customers = self.service.add_customers(customers, uuid.UUID(plan_id))
+
+            return [customer.to_dict() for customer in added_customers], HTTPStatus.CREATED
+        except Exception as ex:
+            log.error(f'Some error occurred trying to add customers: {ex}')
+            return {'message': 'Something went wrong trying to add customers'}, HTTPStatus.INTERNAL_SERVER_ERROR

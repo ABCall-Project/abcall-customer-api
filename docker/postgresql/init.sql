@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS plan(
 
 CREATE TABLE IF NOT EXISTS customer (
     id UUID PRIMARY KEY,
-    name VARCHAR(50),
+    document VARCHAR(20),
+    name VARCHAR(150),
     plan_id UUID,
     date_suscription TIMESTAMP WITH TIME ZONE,
     CONSTRAINT fk_plan

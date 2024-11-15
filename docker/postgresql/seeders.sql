@@ -6,8 +6,8 @@ INSERT INTO plan (id,name,basic_monthly_rate,issue_fee) VALUES
 
 
 
-INSERT INTO customer (id,name,plan_id,date_suscription) VALUES
-	 ('845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'Logan IT','845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'2024-10-12 00:00:00.000');
+INSERT INTO customer (id,document,name,plan_id,date_suscription) VALUES
+	 ('845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'900200195','Logan IT','845eb227-5356-4169-9799-95a97ec5ce33'::uuid,'2024-10-12 00:00:00.000');
 
 
 INSERT INTO channel_plan (id,channel_id,plan_id) VALUES
