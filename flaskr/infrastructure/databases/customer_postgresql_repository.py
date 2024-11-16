@@ -60,3 +60,19 @@ class CustomerPostgresqlRepository(CustomerRepository):
                     return None
             finally:
                 session.close()
+    
+    def create_customer(self, name, plan_id):
+        with self.session() as session:
+            try:
+                customer = CustomerModelSqlAlchemy(
+                    name=name,
+                    plan_id=plan_id
+                )
+                session.add(customer)
+                session.commit()
+                session.refresh(customer)
+                return self._from_model(customer)
+            except Exception as ex:
+                raise ex
+            finally:
+                session.close()

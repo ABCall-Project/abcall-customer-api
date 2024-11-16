@@ -100,3 +100,19 @@ class CustomerService:
         self.log.info(f"Successfully loaded {len(added_entries)} entries for customer ID: {customer_id}")
         return added_entries
     
+    def create_customer(self, name, plan_id):
+        """
+        This method creates a new customer.
+        
+        Args:
+            name (str): The name of the customer.
+            plan_id (UUID): The plan ID associated with the customer.
+        
+        Returns:
+            Customer: The newly created customer.
+        """
+        self.log.info(f"Creating new customer: {name}")
+        customer = self.customer_repository.create_customer(name, plan_id)
+        self.log.info(f"Successfully created new customer: {name}")
+        return customer
+    

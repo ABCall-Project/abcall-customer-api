@@ -7,8 +7,8 @@ from ...infrastructure.databases.channel_postgresql_repository import ChannelPos
 from ...infrastructure.databases.customer_database_postgresql_repository import CustomerDatabasePostgresqlRepository
 from http import HTTPStatus
 from ...utils import Logger
-
-from config import Config
+from .validation_customer import validate_customer
+from ...domain.models import PlanEnum
 
 log = Logger()
 
@@ -41,6 +41,8 @@ class Customer(Resource):
     def post(self, action=None):
         if action == 'loadCustomerDataBase':
             return self.load_customer_database_entries()
+        if action == 'create':
+            return self.create()
         else:
             return {"message": "Action not supported for POST method"}, 405
             
@@ -143,3 +145,21 @@ class Customer(Resource):
         except Exception as ex:
             log.error(f'Some error occurred trying to load entries for customer_id {customer_id}: {ex}')
             return {'message': 'Something was wrong trying to load entries for customer data'}, HTTPStatus.INTERNAL_SERVER_ERROR
+    
+    @validate_customer()
+    def create(self):
+        try:
+            name = request.form.get('name')
+            plan_id = request.form.get('plan_id')
+            if (plan_id is None):
+                plan_id = PlanEnum.ENTREPRENEUR.value
+            
+            log.info(f'Receive request to create customer with name {name} and plan_id {plan_id}')
+
+            customer = self.service.create_customer(name, plan_id)
+            
+            return customer.to_dict(), HTTPStatus.CREATED
+
+        except Exception as ex:
+            log.error(f'Some error occurred trying to create customer: {ex}')
+            return {'message': 'Something was wrong trying to create customer'}, HTTPStatus.INTERNAL_SERVER_ERROR

@@ -14,3 +14,6 @@ class CustomerRepository:
 
     def get_customer_issue_fee(self,customer_id):
         raise NotImplementedError
+    
+    def create_customer(self, name, plan_id):
+        raise NotImplementedError
