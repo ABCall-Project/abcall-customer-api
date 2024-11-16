@@ -35,8 +35,8 @@ class TestCustomerService(unittest.TestCase):
 
     def test_list_customers(self):
         expected_customers = [
-            Customer(id=uuid4(), name="Customer1", plan_id=uuid4(), date_suscription="2023-01-01"),
-            Customer(id=uuid4(), name="Customer2", plan_id=uuid4(), date_suscription="2023-02-01")
+            Customer(id=uuid4(), document='123456', name="Customer1", plan_id=uuid4(), date_suscription="2023-01-01"),
+            Customer(id=uuid4(), document='654321', name="Customer2", plan_id=uuid4(), date_suscription="2023-02-01")
         ]
         self.mock_customer_repository.list.return_value = expected_customers
         
@@ -67,7 +67,7 @@ class TestCustomerService(unittest.TestCase):
 
     def test_get_customer_by_id(self):
         customer_id = uuid4()
-        expected_customer = Customer(id=customer_id, name="Customer1", plan_id=uuid4(), date_suscription="2023-01-01")
+        expected_customer = Customer(id=customer_id, document='123456', name="Customer1", plan_id=uuid4(), date_suscription="2023-01-01")
         self.mock_customer_repository.get_customer_by_id.return_value = expected_customer
         
         result = self.service.get_customer_by_id(customer_id)

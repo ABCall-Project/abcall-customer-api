@@ -100,3 +100,22 @@ class CustomerService:
         self.log.info(f"Successfully loaded {len(added_entries)} entries for customer ID: {customer_id}")
         return added_entries
     
+    def add_customers(self, customers: List[dict], plan_id: uuid.UUID) -> List[Customer]:
+        """
+        This method adds multiple customers to the database with a specific plan ID and current subscription date.
+        
+        Args:
+            customers (List[dict]): List of customer data containing 'document' and 'name'.
+            plan_id (UUID): The subscription plan ID to assign to all customers.
+        
+        Returns:
+            List[Customer]: List of successfully added Customer instances.
+        """
+        self.log.info(f"Adding {len(customers)} customers with plan ID: {plan_id}")
+        try:
+            added_customers = self.customer_repository.add_customers(customers, plan_id)
+            self.log.info(f"Successfully added {len(added_customers)} customers with plan ID: {plan_id}")
+            return added_customers
+        except Exception as e:
+            self.log.error(f"Failed to add customers: {str(e)}")
+            raise
