@@ -17,3 +17,6 @@ class CustomerRepository:
     
     def create_customer(self, name, plan_id):
         raise NotImplementedError
+    
+    def add_customers(self, customers: List[dict], plan_id: UUID) -> List[Customer]:
+        raise NotImplementedError

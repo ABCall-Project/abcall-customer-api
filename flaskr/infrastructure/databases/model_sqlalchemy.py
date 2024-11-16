@@ -12,7 +12,8 @@ class PlanModelSqlAlchemy(Base):
     __tablename__ = 'plan'
     
     id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(100), nullable=False)
+    document = Column(String(40), nullable=False)
+    name = Column(String(300), nullable=False)
     basic_monthly_rate=Column(Numeric(10, 2), nullable=False)
     issue_fee=Column(Numeric(10, 2), nullable=False)
 
@@ -20,7 +21,8 @@ class CustomerModelSqlAlchemy(Base):
     __tablename__ = 'customer'
     
     id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(100), nullable=False)
+    document = Column(String(40), nullable=False)
+    name = Column(String(300), nullable=False)
     plan_id=Column(PG_UUID(as_uuid=True),ForeignKey('plan.id'), default=uuid.uuid4)
     date_suscription=Column(DateTime(timezone=True), default=func.now())
     plan = relationship("PlanModelSqlAlchemy")
