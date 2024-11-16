@@ -1,7 +1,5 @@
 from flask_restful import Resource
-from flask import jsonify, request
-import logging
-import requests
+from flask import request
 from ...application.customer_service import CustomerService
 from ...infrastructure.databases.customer_postgresql_repository import CustomerPostgresqlRepository
 from ...infrastructure.databases.plan_postgresql_repository import PlanPostgresqlRepository
@@ -17,11 +15,10 @@ log = Logger()
 class Customer(Resource):
 
     def __init__(self):
-        config = Config()
-        self.customer_repository = CustomerPostgresqlRepository(config.DATABASE_URI)
-        self.plan_repository=PlanPostgresqlRepository(config.DATABASE_URI)
-        self.channel_repository=ChannelPostgresqlRepository(config.DATABASE_URI)
-        self.customer_database_repository = CustomerDatabasePostgresqlRepository(config.DATABASE_URI)
+        self.customer_repository = CustomerPostgresqlRepository()
+        self.plan_repository=PlanPostgresqlRepository()
+        self.channel_repository=ChannelPostgresqlRepository()
+        self.customer_database_repository = CustomerDatabasePostgresqlRepository()
         self.service = CustomerService(self.customer_repository,self.plan_repository,self.channel_repository, self.customer_database_repository)        
 
 
