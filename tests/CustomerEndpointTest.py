@@ -4,6 +4,8 @@ from flask import Flask, request
 from flask_restful import Api
 from http import HTTPStatus
 from flaskr.endpoint.Customer import Customer
+from builder import CustomerBuilder
+from flaskr.domain.models.PlanEnum import PlanEnum
 
 
 class TestCustomer(unittest.TestCase):
@@ -81,6 +83,86 @@ class TestCustomer(unittest.TestCase):
 
     def test_action_not_found(self):
         response = self.client.get('/customer/invalidAction')
+        
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json, {"message": "Action not found"})
+
+    def test_should_create_a_new_customer(self):
+        customer = CustomerBuilder().build()
+        data = {
+            'name': customer.name,
+            'plan_id': customer.plan_id
+        }
+        response = self.client.post('/customer/create', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+        self.assertEqual(response.json.get('name'), data['name'])
+        self.assertEqual(response.json.get('plan_id'), str(data['plan_id']))
+
+    def test_should_create_a_new_customer_with_a_default_plan(self):
+        customer = CustomerBuilder().build()
+        data = {
+            'name': customer.name
+        }
+        response = self.client.post('/customer/create', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.CREATED)
+        self.assertEqual(response.json.get('name'), data['name'])
+        self.assertEqual(response.json.get('plan_id'), PlanEnum.ENTREPRENEUR.value)
+    
+    @patch('flaskr.application.customer_service.CustomerService.create_customer')
+    def test_should_return_internal_server_error_when_execute_create_customer(self, mock_create_customer):
+        customer = CustomerBuilder().build()
+        data = {
+            'name': customer.name
+        }
+        expected_response = {
+            'message': 'Something was wrong trying to create customer'
+        }
+        mock_create_customer.side_effect = Exception('Some weird error occurred 🤯')
+        
+        response = self.client.post('/customer/create', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.INTERNAL_SERVER_ERROR)
+        self.assertEqual(response.json.get('message'), expected_response['message'])
+    
+    def test_should_return_not_allow_error_when_the_action_not_exist(self):
+        customer = CustomerBuilder().build()
+        data = {
+            'name': customer.name
+        }
+        expected_response = {
+            'message': 'Action not supported for POST method'
+        }
+        
+        response = self.client.post('/customer/fake', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
+        self.assertEqual(response.json.get('message'), expected_response['message'])
+
+    def test_should_return_bad_request_error_when_name_is_empty(self):
+        data = {
+            'name': ''
+        }
+        expected_response = {
+            'message': 'Name cannot be empty'
+        }
+        
+        response = self.client.post('/customer/create', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertEqual(response.json.get('message'), expected_response['message'])
+    
+    def test_should_return_bad_request_error_when_name_is_grant_to_100(self):
+        data = {
+            'name': 'd'*101
+        }
+        expected_response = {
+            'message': 'The Name is not complete with the maximum, should be 100 characters'
+        }
+        
+        response = self.client.post('/customer/create', data=data)
+        
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertEqual(response.json.get('message'), expected_response['message'])
 

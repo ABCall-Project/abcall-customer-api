@@ -1,6 +1,5 @@
 from typing import List
 from ..domain.models import Customer
-import requests
 from ..domain.interfaces.customer_repository import CustomerRepository
 from ..domain.interfaces.customer_database_repository import CustomerDatabaseRepository
 from ..domain.interfaces.plan_repository import PlanRepository
@@ -99,6 +98,22 @@ class CustomerService:
         added_entries = self.customer_database_repository.add_customer_database_entries(customer_id, entries)
         self.log.info(f"Successfully loaded {len(added_entries)} entries for customer ID: {customer_id}")
         return added_entries
+    
+    def create_customer(self, name, plan_id):
+        """
+        This method creates a new customer.
+        
+        Args:
+            name (str): The name of the customer.
+            plan_id (UUID): The plan ID associated with the customer.
+        
+        Returns:
+            Customer: The newly created customer.
+        """
+        self.log.info(f"Creating new customer: {name}")
+        customer = self.customer_repository.create_customer(name, plan_id)
+        self.log.info(f"Successfully created new customer: {name}")
+        return customer
     
     def add_customers(self, customers: List[dict], plan_id: uuid.UUID) -> List[Customer]:
         """

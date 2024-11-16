@@ -8,7 +8,7 @@ class Customer:
         plan_id (UUID): plan suscription id
         date_suscription (Timestamp): date suscription
     """
-    def __init__(self, id, document, name,plan_id,date_suscription):
+    def __init__(self, id, name,plan_id,date_suscription, document=None):
         self.id=id
         self.document=document
         self.name=name

@@ -1,8 +1,6 @@
 import uuid
 from flask_restful import Resource
-from flask import jsonify, request
-import logging
-import requests
+from flask import request
 from ...application.customer_service import CustomerService
 from ...infrastructure.databases.customer_postgresql_repository import CustomerPostgresqlRepository
 from ...infrastructure.databases.plan_postgresql_repository import PlanPostgresqlRepository
@@ -10,19 +8,18 @@ from ...infrastructure.databases.channel_postgresql_repository import ChannelPos
 from ...infrastructure.databases.customer_database_postgresql_repository import CustomerDatabasePostgresqlRepository
 from http import HTTPStatus
 from ...utils import Logger
-
-from config import Config
+from .validation_customer import validate_customer
+from ...domain.models import PlanEnum
 
 log = Logger()
 
 class Customer(Resource):
 
     def __init__(self):
-        config = Config()
-        self.customer_repository = CustomerPostgresqlRepository(config.DATABASE_URI)
-        self.plan_repository=PlanPostgresqlRepository(config.DATABASE_URI)
-        self.channel_repository=ChannelPostgresqlRepository(config.DATABASE_URI)
-        self.customer_database_repository = CustomerDatabasePostgresqlRepository(config.DATABASE_URI)
+        self.customer_repository = CustomerPostgresqlRepository()
+        self.plan_repository=PlanPostgresqlRepository()
+        self.channel_repository=ChannelPostgresqlRepository()
+        self.customer_database_repository = CustomerDatabasePostgresqlRepository()
         self.service = CustomerService(self.customer_repository,self.plan_repository,self.channel_repository, self.customer_database_repository)        
 
 
@@ -45,6 +42,8 @@ class Customer(Resource):
     def post(self, action=None):
         if action == 'loadCustomerDataBase':
             return self.load_customer_database_entries()
+        if action == 'create':
+            return self.create()
         if action == 'loadCustomers':
             return self.add_customers()
         else:
@@ -150,6 +149,24 @@ class Customer(Resource):
             log.error(f'Some error occurred trying to load entries for customer_id {customer_id}: {ex}')
             return {'message': 'Something was wrong trying to load entries for customer data'}, HTTPStatus.INTERNAL_SERVER_ERROR
     
+    @validate_customer()
+    def create(self):
+        try:
+            name = request.form.get('name')
+            plan_id = request.form.get('plan_id')
+            if (plan_id is None):
+                plan_id = PlanEnum.ENTREPRENEUR.value
+            
+            log.info(f'Receive request to create customer with name {name} and plan_id {plan_id}')
+
+            customer = self.service.create_customer(name, plan_id)
+            
+            return customer.to_dict(), HTTPStatus.CREATED
+
+        except Exception as ex:
+            log.error(f'Some error occurred trying to create customer: {ex}')
+            return {'message': 'Something was wrong trying to create customer'}, HTTPStatus.INTERNAL_SERVER_ERROR
+        
     def add_customers(self):
         try:
             customers = request.json.get('customers', [])

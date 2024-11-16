@@ -101,4 +101,15 @@ class TestCustomerService(unittest.TestCase):
         result = self.service.load_customer_database_entries(customer_id, entries)
 
         self.assertEqual(result, expected_entries)
-        self.mock_customer_database_repository.add_customer_database_entries.assert_called_once_with(customer_id, entries) 
+        self.mock_customer_database_repository.add_customer_database_entries.assert_called_once_with(customer_id, entries)
+    
+    def test_create_customer(self):
+        name = "Customer1"
+        plan_id = uuid4()
+        expected_customer = Customer(id=uuid4(), name=name, plan_id=plan_id, date_suscription="2023-01-01")
+        self.mock_customer_repository.create_customer.return_value = expected_customer
+        
+        result = self.service.create_customer(name, plan_id)
+        
+        self.assertEqual(result, expected_customer)
+        self.mock_customer_repository.create_customer.assert_called_once_with(name, plan_id)
