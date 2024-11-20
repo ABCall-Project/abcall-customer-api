@@ -61,7 +61,7 @@ class CustomerPostgresqlRepository(CustomerRepository):
                 else:
                     return None
             finally:
-                session.close()
+                session.close()            
     
     def create_customer(self, name, plan_id):
         with self.session() as session:
@@ -77,19 +77,10 @@ class CustomerPostgresqlRepository(CustomerRepository):
             except Exception as ex:
                 raise ex
             finally:
-                session.close()
-        session = self.Session()
-        try:
-            result = session.query(CustomerModelSqlAlchemy).filter_by(id=customer_id).first()
-            if result:
-                return self._from_model(result)
-            else:
-                return None
-        finally:
-            session.close()
+                session.close()        
 
     def add_customers(self, customers: List[dict], plan_id: UUID) -> List[Customer]: 
-        with session() as session:
+        with self.session() as session:
             successful_customers = []
             try:
                 for customer_data in customers:
