@@ -112,4 +112,4 @@ class TestCustomerService(unittest.TestCase):
         result = self.service.create_customer(name, plan_id)
         
         self.assertEqual(result, expected_customer)
-        self.mock_customer_repository.create_customer.assert_called_once_with(name, plan_id)
+        self.mock_customer_repository.create_customer.assert_called_once_with(name, plan_id, None)

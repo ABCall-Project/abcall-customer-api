@@ -99,7 +99,7 @@ class CustomerService:
         self.log.info(f"Successfully loaded {len(added_entries)} entries for customer ID: {customer_id}")
         return added_entries
     
-    def create_customer(self, name, plan_id):
+    def create_customer(self, name, plan_id, document = None):
         """
         This method creates a new customer.
         
@@ -111,7 +111,7 @@ class CustomerService:
             Customer: The newly created customer.
         """
         self.log.info(f"Creating new customer: {name}")
-        customer = self.customer_repository.create_customer(name, plan_id)
+        customer = self.customer_repository.create_customer(name, plan_id, document)
         self.log.info(f"Successfully created new customer: {name}")
         return customer
     

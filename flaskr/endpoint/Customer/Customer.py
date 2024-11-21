@@ -153,13 +153,14 @@ class Customer(Resource):
     def create(self):
         try:
             name = request.form.get('name')
+            document = request.form.get('document')
             plan_id = request.form.get('plan_id')
             if (plan_id is None):
                 plan_id = PlanEnum.ENTREPRENEUR.value
             
             log.info(f'Receive request to create customer with name {name} and plan_id {plan_id}')
 
-            customer = self.service.create_customer(name, plan_id)
+            customer = self.service.create_customer(name, plan_id, document)
             
             return customer.to_dict(), HTTPStatus.CREATED
 
