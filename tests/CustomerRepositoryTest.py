@@ -22,4 +22,4 @@ class CustomerRepositoryTestCase(unittest.TestCase):
     
     def test_create_customer_implementation(self):
         with self.assertRaises(NotImplementedError):
-            self.repo.create_customer(name='', plan_id=None)
+            self.repo.create_customer(name='', plan_id=None, document=None)

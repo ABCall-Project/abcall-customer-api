@@ -63,12 +63,13 @@ class CustomerPostgresqlRepository(CustomerRepository):
             finally:
                 session.close()            
     
-    def create_customer(self, name, plan_id):
+    def create_customer(self, name, plan_id, document = None):
         with self.session() as session:
             try:
                 customer = CustomerModelSqlAlchemy(
                     name=name,
-                    plan_id=plan_id
+                    plan_id=plan_id,
+                    document=document
                 )
                 session.add(customer)
                 session.commit()
