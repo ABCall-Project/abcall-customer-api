@@ -159,9 +159,14 @@ class Customer(Resource):
                 plan_id = PlanEnum.ENTREPRENEUR.value
             
             log.info(f'Receive request to create customer with name {name} and plan_id {plan_id}')
+            if document:
+                customerFound = self.customer_repository.get_customer_by_document(document)
 
-            customer = self.service.create_customer(name, plan_id, document)
-            
+            if document == None or not customerFound:
+                customer = self.service.create_customer(name, plan_id, document)
+            else:
+                return {'message': 'Customer already exists'}, HTTPStatus.CONFLICT
+        
             return customer.to_dict(), HTTPStatus.CREATED
 
         except Exception as ex:

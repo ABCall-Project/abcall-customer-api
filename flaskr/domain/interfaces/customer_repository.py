@@ -20,3 +20,6 @@ class CustomerRepository:
     
     def add_customers(self, customers: List[dict], plan_id: UUID) -> List[Customer]:
         raise NotImplementedError
+
+    def get_customer_by_document(self, document: str) -> Optional[Customer]:
+        raise NotImplementedError
