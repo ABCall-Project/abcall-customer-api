@@ -106,3 +106,14 @@ class CustomerPostgresqlRepository(CustomerRepository):
                 raise e
             finally:
                 session.close()
+    
+    def get_customer_by_document(self, document: str) -> Optional[Customer]:
+        with self.session() as session:
+            try:
+                result = session.query(CustomerModelSqlAlchemy).filter_by(document=document).first()
+                if result:
+                    return self._from_model(result)
+                else:
+                    return None
+            finally:
+                session.close()
