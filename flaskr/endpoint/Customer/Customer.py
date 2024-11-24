@@ -1,7 +1,6 @@
+import uuid
 from flask_restful import Resource
-from flask import jsonify, request
-import logging
-import requests
+from flask import request
 from ...application.customer_service import CustomerService
 from ...infrastructure.databases.customer_postgresql_repository import CustomerPostgresqlRepository
 from ...infrastructure.databases.plan_postgresql_repository import PlanPostgresqlRepository
@@ -9,19 +8,18 @@ from ...infrastructure.databases.channel_postgresql_repository import ChannelPos
 from ...infrastructure.databases.customer_database_postgresql_repository import CustomerDatabasePostgresqlRepository
 from http import HTTPStatus
 from ...utils import Logger
-
-from config import Config
+from .validation_customer import validate_customer
+from ...domain.models import PlanEnum
 
 log = Logger()
 
 class Customer(Resource):
 
     def __init__(self):
-        config = Config()
-        self.customer_repository = CustomerPostgresqlRepository(config.DATABASE_URI)
-        self.plan_repository=PlanPostgresqlRepository(config.DATABASE_URI)
-        self.channel_repository=ChannelPostgresqlRepository(config.DATABASE_URI)
-        self.customer_database_repository = CustomerDatabasePostgresqlRepository(config.DATABASE_URI)
+        self.customer_repository = CustomerPostgresqlRepository()
+        self.plan_repository=PlanPostgresqlRepository()
+        self.channel_repository=ChannelPostgresqlRepository()
+        self.customer_database_repository = CustomerDatabasePostgresqlRepository()
         self.service = CustomerService(self.customer_repository,self.plan_repository,self.channel_repository, self.customer_database_repository)        
 
 
@@ -44,6 +42,10 @@ class Customer(Resource):
     def post(self, action=None):
         if action == 'loadCustomerDataBase':
             return self.load_customer_database_entries()
+        if action == 'create':
+            return self.create()
+        if action == 'loadCustomers':
+            return self.add_customers()
         else:
             return {"message": "Action not supported for POST method"}, 405
             
@@ -146,3 +148,44 @@ class Customer(Resource):
         except Exception as ex:
             log.error(f'Some error occurred trying to load entries for customer_id {customer_id}: {ex}')
             return {'message': 'Something was wrong trying to load entries for customer data'}, HTTPStatus.INTERNAL_SERVER_ERROR
+    
+    @validate_customer()
+    def create(self):
+        try:
+            name = request.form.get('name')
+            document = request.form.get('document')
+            plan_id = request.form.get('plan_id')
+            if (plan_id is None):
+                plan_id = PlanEnum.ENTREPRENEUR.value
+            
+            log.info(f'Receive request to create customer with name {name} and plan_id {plan_id}')
+            if document:
+                customerFound = self.customer_repository.get_customer_by_document(document)
+
+            if document == None or not customerFound:
+                customer = self.service.create_customer(name, plan_id, document)
+            else:
+                return {'message': 'Customer already exists'}, HTTPStatus.CONFLICT
+        
+            return customer.to_dict(), HTTPStatus.CREATED
+
+        except Exception as ex:
+            log.error(f'Some error occurred trying to create customer: {ex}')
+            return {'message': 'Something was wrong trying to create customer'}, HTTPStatus.INTERNAL_SERVER_ERROR
+        
+    def add_customers(self):
+        try:
+            customers = request.json.get('customers', [])
+            plan_id = request.json.get('plan_id')
+
+            if not plan_id or not customers:
+                log.error('Plan ID or customers list missing in the request')
+                return {'message': 'Plan ID and customers list are required'}, HTTPStatus.BAD_REQUEST
+
+            log.info(f'Receive request to add {len(customers)} customers with plan_id {plan_id}')
+            added_customers = self.service.add_customers(customers, uuid.UUID(plan_id))
+
+            return [customer.to_dict() for customer in added_customers], HTTPStatus.CREATED
+        except Exception as ex:
+            log.error(f'Some error occurred trying to add customers: {ex}')
+            return {'message': 'Something went wrong trying to add customers'}, HTTPStatus.INTERNAL_SERVER_ERROR
