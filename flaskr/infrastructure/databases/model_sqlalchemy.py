@@ -12,7 +12,6 @@ class PlanModelSqlAlchemy(Base):
     __tablename__ = 'plan'
     
     id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    document = Column(String(40), nullable=False)
     name = Column(String(300), nullable=False)
     basic_monthly_rate=Column(Numeric(10, 2), nullable=False)
     issue_fee=Column(Numeric(10, 2), nullable=False)
