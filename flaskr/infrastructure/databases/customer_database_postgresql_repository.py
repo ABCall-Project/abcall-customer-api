@@ -14,7 +14,7 @@ class CustomerDatabasePostgresqlRepository:
         Base.metadata.create_all(self.engine)
 
     def add_customer_database_entries(self, customer_id: UUID, entries: List[dict]) -> List[CustomerDatabase]:      
-        with self.Session() as session:
+        with self.session() as session:
             successful_entries = []
             try:
                 for entry in entries:
